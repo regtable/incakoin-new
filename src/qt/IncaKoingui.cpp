@@ -330,7 +330,6 @@ void IncaKoinGUI::createActions()
     connect(optionsAction, SIGNAL(triggered()), this, SLOT(optionsClicked()));
     connect(toggleHideAction, SIGNAL(triggered()), this, SLOT(toggleHidden()));
     connect(encryptWalletAction, SIGNAL(triggered(bool)), this, SLOT(encryptWallet(bool)));
-    connect(checkWalletAction, SIGNAL(triggered()), this, SLOT(checkWallet()));
     connect(backupWalletAction, SIGNAL(triggered()), this, SLOT(backupWallet()));
     connect(changePassphraseAction, SIGNAL(triggered()), this, SLOT(changePassphrase()));
     connect(unlockWalletAction, SIGNAL(triggered()), this, SLOT(unlockWallet()));
@@ -359,7 +358,7 @@ void IncaKoinGUI::createMenuBar()
     file->addSeparator();
     file->addAction(quitAction);
 
-    QMenu *settings = appMenuBar->addMenu(tr("&Tools"));
+    QMenu *settings = appMenuBar->addMenu(tr("&tools"));
     settings->addAction(optionsAction);
 
     QMenu *wallet = appMenuBar->addMenu(tr("&Wallet"));
@@ -405,7 +404,7 @@ void IncaKoinGUI::setClientModel(ClientModel *clientModel)
         // Replace some strings and icons, when using the testnet
         if(clientModel->isTestNet())
         {
-            setWindowTitle(windowTitle()  QString(" ") + tr("[testnet]"));
+            setWindowTitle(windowTitle() + QString(" ") + tr("[testnet]"));
 #ifndef Q_OS_MAC
             qApp->setWindowIcon(QIcon(":icons/IncaKoin_testnet"));
             setWindowIcon(QIcon(":icons/IncaKoin_testnet"));
@@ -621,7 +620,7 @@ void IncaKoinGUI::setNumBlocks(int count, int nTotalBlocks)
     }
     else
     {
-        tooltip += tr("Catching up...")  QString("<br>")  tooltip;
+        tooltip = tr("Catching up...") + QString("<br>") + tooltip;
         labelBlocksIcon->setMovie(syncIconMovie);
         syncIconMovie->start();
 
@@ -901,65 +900,6 @@ void IncaKoinGUI::encryptWallet(bool status)
     dlg.exec();
 
     setEncryptionStatus(walletModel->getEncryptionStatus());
-}
-
-void IncaKoinGUI::checkWallet()
-{
-
-    int nMismatchSpent;
-    int64_t nBalanceInQuestion;
-    int nOrphansFound;
-
-    if(!walletModel)
-        return;
-
-    // Check the wallet as requested by user
-    walletModel->checkWallet(nMismatchSpent, nBalanceInQuestion, nOrphansFound);
-
-    if (nMismatchSpent == 0 && nOrphansFound == 0)
-        QString strMessage =
-       tr("Check Wallet Information"),
-                tr("Wallet passed integrity test!\n"
-                   "Nothing found to fix.");
-  else
-       notificator->notify(Notificator::Warning, //tr("URI handling"), tr("URI can not be parsed! This can be caused by an invalid PayCon address or malformed URI parameters."));
-           tr("Check Wallet Information"), tr("Wallet failed integrity test!\n\n"
-                  "Mismatched coin(s) found: %1.\n"
-                  "Amount in question: %2.\n"
-                  "Orphans found: %3.\n\n"
-                  "Please backup wallet and run repair wallet.\n")
-                       .arg(nMismatchSpent)
-                        .arg(BitcoinUnits::formatWithUnit(walletModel->getOptionsModel()->getDisplayUnit(), nBalanceInQuestion,true))
-                        .arg(nOrphansFound));
-}
-
-void IncaKoinGUI::repairWallet()
-{
-    int nMismatchSpent;
-    int64_t nBalanceInQuestion;
-    int nOrphansFound;
-
-    if(!walletModel)
-        return;
-
-    // Repair the wallet as requested by user
-    walletModel->repairWallet(nMismatchSpent, nBalanceInQuestion, nOrphansFound);
-
-    if (nMismatchSpent == 0 && nOrphansFound == 0)
-       notificator->notify(Notificator::Warning,
-      tr("Repair Wallet Information"),
-               tr("Wallet passed integrity test!\n"
-                  "Nothing found to fix."));
-    else
-       notificator->notify(Notificator::Warning,
-       tr("Repair Wallet Information"),
-               tr("Wallet failed integrity test and has been repaired!\n"
-                  "Mismatched coin(s) found: %1\n"
-                  "Amount affected by repair: %2\n"
-                  "Orphans removed: %3\n")
-                        .arg(nMismatchSpent)
-                        .arg(BitcoinUnits::formatWithUnit(walletModel->getOptionsModel()->getDisplayUnit(), nBalanceInQuestion,true))
-                        .arg(nOrphansFound));
 }
 
 void IncaKoinGUI::backupWallet()
